@@ -30,8 +30,22 @@ import javax.mail.internet.MimeMultipart;
  * @author walte
  */
 public class sendMail {
-    public static void main(String[] args) throws IOException, AddressException, MessagingException {
 
+    private static void addAttachment(Multipart multipart, String filePath) throws MessagingException
+    {
+        File file = new File(filePath);
+        DataSource source = new FileDataSource(file);
+        BodyPart messageBodyPart = new MimeBodyPart();        
+        messageBodyPart.setDataHandler(new DataHandler(source));
+        messageBodyPart.setFileName(file.getName());
+        multipart.addBodyPart(messageBodyPart);
+    }
+
+    public void enviarCorreo(String[] mailList) throws IOException {
+        
+        String[] to;
+        to = mailList;
+        
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.socketFactory.port", "465");
@@ -48,8 +62,8 @@ public class sendMail {
 
         final String gmailAccount = cofig.getProperty("gmail.account");
         final String gmailPassword = cofig.getProperty("gmail.password");
-        final String[] emailDestinations = cofig.getProperty("emaildestinations").split(";");
-        final String[] attachmentFiles = cofig.getProperty("attachmentfiles").split(";");
+        final String[] emailDestinations = to;
+        //final String[] attachmentFiles = cofig.getProperty("attachmentfiles").split(";");
 
         Session session;
         session = Session.getDefaultInstance(props,
@@ -75,9 +89,9 @@ public class sendMail {
             messageBodyPart.setText("Email text Body - Texto o cuerpo del correo electronico");
 
             Multipart multipart = new MimeMultipart();
-            for (String attachmentFile : attachmentFiles) {
-                addAttachment(multipart, attachmentFile);
-            }
+//            for (String attachmentFile : attachmentFiles) {
+//                addAttachment(multipart, attachmentFile);
+//            }
 
             //Setting email text message
             multipart.addBodyPart(messageBodyPart);
@@ -92,16 +106,5 @@ public class sendMail {
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
-
-    }
-
-    private static void addAttachment(Multipart multipart, String filePath) throws MessagingException
-    {
-        File file = new File(filePath);
-        DataSource source = new FileDataSource(file);
-        BodyPart messageBodyPart = new MimeBodyPart();        
-        messageBodyPart.setDataHandler(new DataHandler(source));
-        messageBodyPart.setFileName(file.getName());
-        multipart.addBodyPart(messageBodyPart);
     }
 }

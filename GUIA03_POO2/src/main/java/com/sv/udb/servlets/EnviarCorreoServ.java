@@ -5,20 +5,8 @@
  */
 package com.sv.udb.servlets;
 
+import com.sv.udb.recursos.sendMail;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -44,66 +32,12 @@ public class EnviarCorreoServ extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        String[] mailList = request.getParameterValues("email");
+        sendMail sm = new sendMail();
         
-            Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.socketFactory.port", "465");
-        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.port", "465");
-
-        String resourceName = "cofig.properties";
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        Properties cofig = new Properties();
-        try(InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
-            cofig.load(resourceStream);
-        }
-
-        final String gmailAccount = cofig.getProperty("gmail.account");
-        final String gmailPassword = cofig.getProperty("gmail.password");
-        final String[] emailDestinations = request.getParameterValues("email");
-
-        Session session;
-        session = Session.getDefaultInstance(props,
-                new javax.mail.Authenticator() {
-                    @Override
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(gmailAccount,gmailPassword);
-                    }
-                });
-
-        try {
-
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(gmailAccount));
-
-            for (String emailDestination : emailDestinations) {
-                message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(emailDestination));
-            }
-
-            message.setSubject("Email Subject - Asunto del correo electronico");
-
-            BodyPart messageBodyPart = new MimeBodyPart();
-            messageBodyPart.setText("Email text Body - Texto o cuerpo del correo electronico");
-
-            Multipart multipart = new MimeMultipart();
-//            for (String attachmentFile : attachmentFiles) {
-//                addAttachment(multipart, attachmentFile);
-//            }
-
-            //Setting email text message
-            multipart.addBodyPart(messageBodyPart);
-
-            //set the attachments to the email
-            message.setContent(multipart);
-
-            Transport.send(message);
-
-            System.out.println("Correo enviado");
-
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        }
+        sm.enviarCorreo(mailList);
+        response.sendRedirect(request.getContextPath() + "/index.jsp");
+       
 
     }
 
