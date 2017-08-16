@@ -32,13 +32,25 @@ public class EnviarCorreoServ extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        String[] mailList = request.getParameterValues("email");
-        sendMail sm = new sendMail();
-        
-        sm.enviarCorreo(mailList);
-        response.sendRedirect(request.getContextPath() + "/index.jsp");
-       
-
+        boolean esValido = request.getMethod().equals("POST");
+        String mens = "";
+        if(!esValido)
+        {
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
+        }
+        else {                
+            String cc =  request.getParameter("cc");
+            String cco = request.getParameter("cco");
+            String asunto = request.getParameter("asunto");
+            String mensaje = request.getParameter("mensaje");
+            String[] destino = request.getParameterValues("para");
+            sendMail sm = new sendMail();
+            
+            if (sm.enviarCorreo(destino, mensaje, asunto)){
+                request.getRequestDispatcher("/index.jsp").forward(request, response);
+            }
+            else System.out.println("Error we :v");
+        }
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

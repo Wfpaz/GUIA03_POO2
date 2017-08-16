@@ -41,10 +41,13 @@ public class sendMail {
         multipart.addBodyPart(messageBodyPart);
     }
 
-    public void enviarCorreo(String[] mailList) throws IOException {
+    public boolean enviarCorreo(String[] mailList, String mailBody, String mailSubject) throws IOException {
         
         String[] to;
         to = mailList;
+        String cuerpo, asunto;
+        cuerpo = mailBody;
+        asunto = mailSubject;
         
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com");
@@ -83,10 +86,10 @@ public class sendMail {
                 message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(emailDestination));
             }
 
-            message.setSubject("Email Subject - Asunto del correo electronico");
+            message.setSubject(asunto);
 
             BodyPart messageBodyPart = new MimeBodyPart();
-            messageBodyPart.setText("Email text Body - Texto o cuerpo del correo electronico");
+            messageBodyPart.setText(cuerpo);
 
             Multipart multipart = new MimeMultipart();
 //            for (String attachmentFile : attachmentFiles) {
@@ -102,6 +105,7 @@ public class sendMail {
             Transport.send(message);
 
             System.out.println("Correo enviado");
+            return true;
 
         } catch (MessagingException e) {
             throw new RuntimeException(e);
